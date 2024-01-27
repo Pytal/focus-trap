@@ -502,6 +502,7 @@ const createFocusTrap = function (elements, userOptions) {
             state.tabbableGroups[state.tabbableGroups.length - 1]
               .lastTabbableNode;
         } else {
+          // debugger
           // ...the first node in the first group
           destinationNode = state.tabbableGroups[0].firstTabbableNode;
         }
@@ -655,6 +656,7 @@ const createFocusTrap = function (elements, userOptions) {
         state.mostRecentlyFocusedNode = target;
       }
     } else {
+      // debugger
       // escaped! pull it back in to where it just left
       event.stopImmediatePropagation();
 
@@ -745,6 +747,20 @@ const createFocusTrap = function (elements, userOptions) {
     state.recentNavEvent = undefined; // clear
   };
 
+  /**
+   * @param {FocusEvent} event
+   */
+  const checkFocusOut = function (event) {
+    // console.debug('[checkFocusOut] event', event)
+    // debugger
+    if (event.relatedTarget === null) {
+      // escaped! pull it back in to where it just left
+      if (state.mostRecentlyFocusedNode) {
+        tryFocus(state.mostRecentlyFocusedNode)
+      }
+    }
+  }
+
   // Hijack key nav events on the first and last focusable nodes of the trap,
   // in order to prevent focus from escaping. If it escapes for even a
   // moment it can end up scrolling the page and causing confusion so we
@@ -821,6 +837,7 @@ const createFocusTrap = function (elements, userOptions) {
       : tryFocus(getInitialFocusNode());
 
     doc.addEventListener('focusin', checkFocusIn, true);
+    doc.addEventListener('focusout', checkFocusOut, true);
     doc.addEventListener('mousedown', checkPointerDown, {
       capture: true,
       passive: false,
